@@ -59,21 +59,26 @@ namespace
 
 void act(DiscordState *state)
 {
+  // Activity base
   discord::Activity activity{};
+
+  // Current vars
   std::string songname;
   std::string artist;
+  // Prev vars
   std::string prevA = "";
   std::string prevS = "";
 
+  // Templates
   // activity.SetDetails("Fruit Tarts");
-
   // activity.SetState("Pop Snacks");
   // activity.GetAssets().SetSmallImage("applemusic");
   // activity.GetAssets().SetSmallText("i mage");
-  activity.GetAssets().SetLargeImage("applemusic");
   // activity.GetAssets().SetLargeText("u mage");
+  activity.GetAssets().SetLargeImage("applemusic");
   activity.SetType(discord::ActivityType::Listening);
 
+  // Polling for changes from the file
   while (1)
   {
     std::ifstream MyReadFile("../musicord.txt");
