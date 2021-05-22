@@ -6,6 +6,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <fstream>
+#include <string>
 #include <thread>
 #include <vector>
 
@@ -58,21 +60,38 @@ namespace
 void act(DiscordState *state)
 {
   discord::Activity activity{};
+  std::string songname;
+  std::string artist;
+  std::string prevA = "";
+  std::string prevS = "";
 
-  activity.SetDetails("Fruit Tarts");
+  // activity.SetDetails("Fruit Tarts");
 
-  activity.SetState("Pop Snacks");
-  activity.GetAssets().SetSmallImage("applemusic");
-  activity.GetAssets().SetSmallText("i mage");
+  // activity.SetState("Pop Snacks");
+  // activity.GetAssets().SetSmallImage("applemusic");
+  // activity.GetAssets().SetSmallText("i mage");
   activity.GetAssets().SetLargeImage("applemusic");
-  activity.GetAssets().SetLargeText("u mage");
+  // activity.GetAssets().SetLargeText("u mage");
   activity.SetType(discord::ActivityType::Listening);
-  state->core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
-    std::cout << ((result == discord::Result::Ok) ? "Succeeded" : "Failed")
-              << " updating activity!\n";
-  });
 
-  // std::this_thread::sleep_for(std::chrono::seconds(30));
+  while (1)
+  {
+    std::ifstream MyReadFile("../musicord.txt");
+    getline(MyReadFile, songname);
+    activity.SetDetails(songname.c_str());
+    getline(MyReadFile, artist);
+    activity.SetState(artist.c_str());
+    if (artist != prevA || songname != prevS)
+    {
+      prevA = artist;
+      prevS = songname;
+      state->core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
+        std::cout << ((result == discord::Result::Ok) ? "Succeeded" : "Failed")
+                  << " updating activity!\n";
+      });
+    }
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+  }
 }
 
 int main(int, char **)
@@ -88,8 +107,7 @@ int main(int, char **)
     std::exit(-1);
   }
 
-  // std::thread thread_obj(act, &state);
-  act(&state);
+  std::thread thread_obj(act, &state);
 
   std::signal(SIGINT, [](int) { interrupted = true; });
 
